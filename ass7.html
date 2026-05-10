@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NFT Cards UI</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      background:
+      radial-gradient(circle at top left,#8b0d59,#12002f 40%,#050014);
+      padding:40px 60px;
+      position:relative;
+      overflow-x:hidden;
+    }
+
+    /* small dots */
+
+    .dot{
+      width:8px;
+      height:8px;
+      background:white;
+      border-radius:50%;
+      position:absolute;
+      opacity:0.8;
+    }
+
+    .dot1{ top:25px; left:15px; }
+    .dot2{ top:30px; right:15px; }
+    .dot3{ top:520px; left:10px; }
+    .dot4{ top:530px; right:10px; }
+    .dot5{ bottom:20px; left:15px; }
+    .dot6{ bottom:20px; right:15px; }
+
+    /* heading */
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:40px;
+      color:white;
+    }
+
+    .top h1{
+      font-size:34px;
+      font-weight:500;
+    }
+
+    .top p{
+      font-size:18px;
+      cursor:pointer;
+    }
+
+    /* cards container */
+
+    .cards{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      gap:45px 20px;
+    }
+
+    /* card */
+
+    .card{
+      width:260px;
+      background:rgba(255,255,255,0.18);
+      border-radius:25px;
+      padding:18px;
+      backdrop-filter:blur(8px);
+      position:relative;
+      transition:0.4s;
+    }
+
+    .card:hover{
+      transform:translateY(-10px);
+    }
+
+    /* image box */
+
+    .img-box{
+      width:100%;
+      height:190px;
+      border-radius:18px;
+      overflow:hidden;
+      border:2px solid rgba(255,255,255,0.8);
+      position:relative;
+    }
+
+    .img-box img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    /* card details */
+
+    .info{
+      margin-top:18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      color:white;
+    }
+
+    .title{
+      font-size:24px;
+      font-weight:500;
+    }
+
+    .likes{
+      font-size:14px;
+      color:#ddd;
+    }
+
+    /* button */
+
+    .bid-btn{
+      width:100%;
+      margin-top:22px;
+      padding:14px;
+      border-radius:40px;
+      border:3px solid #b45cff;
+      background:transparent;
+      color:white;
+      font-size:28px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    .bid-btn:hover{
+      background:#b45cff;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <!-- decorative dots -->
+
+  <div class="dot dot1"></div>
+  <div class="dot dot2"></div>
+  <div class="dot dot3"></div>
+  <div class="dot dot4"></div>
+  <div class="dot dot5"></div>
+  <div class="dot dot6"></div>
+
+  <!-- heading -->
+
+  <div class="top">
+    <h1>Explore Art Work</h1>
+    <p>See All</p>
+  </div>
+
+  <!-- cards -->
+
+  <div class="cards">
+
+    <!-- CARD 1 -->
+
+    <div class="card">
+
+      <div class="img-box">
+        <img src="https://images.unsplash.com/photo-1638803040283-7a5ffd48dad5?q=80&w=800&auto=format&fit=crop" alt="">
+      </div>
+
+      <div class="info">
+        <h2 class="title">Monocular</h2>
+        <span class="likes">54.8k ♡</span>
+      </div>
+
+      <button class="bid-btn">Place Bid</button>
+
+    </div>
+
+    <!-- CARD 2 -->
+
+    <div class="card">
+
+      <div class="img-box">
+        <img src="https://images.unsplash.com/photo-1611605698335-8b1569810432?q=80&w=800&auto=format&fit=crop" alt="">
+      </div>
+
+      <div class="info">
+        <h2 class="title">Horns Mask</h2>
+        <span class="likes">32.4k ♡</span>
+      </div>
+
+      <button class="bid-btn">Place Bid</button>
+
+    </div>
+
+    <!-- CARD 3 -->
+
+    <div class="card">
+
+      <div class="img-box">
+        <img src="https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=800&auto=format&fit=crop" alt="">
+      </div>
+
+      <div class="info">
+        <h2 class="title">Light Moon</h2>
+        <span class="likes">86.8k ♡</span>
+      </div>
+
+      <button class="bid-btn">Place Bid</button>
+
+    </div>
+
+    <!-- CARD 4 -->
+
+    <div class="card">
+
+      <div class="img-box">
+        <img src="https://images.unsplash.com/photo-1635322966219-b75ed372eb01?q=80&w=800&auto=format&fit=crop" alt="">
+      </div>
+
+      <div class="info">
+        <h2 class="title">Skull Wire</h2>
+        <span class="likes">78.9k ♡</span>
+      </div>
+
+      <button class="bid-btn">Place Bid</button>
+
+    </div>
+
+    <!-- CARD 5 -->
+
+    <div class="card">
+
+      <div class="img-box">
+        <img src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=800&auto=format&fit=crop" alt="">
+      </div>
+
+      <div class="info">
+        <h2 class="title">Spiderman</h2>
+        <span class="likes">24.8k ♡</span>
+      </div>
+
+      <button class="bid-btn">Place Bid</button>
+
+    </div>
+
+    <!-- CARD 6 -->
+
+    <div class="card">
+
+      <div class="img-box">
+        <img src="https://images.unsplash.com/photo-1608889175123-8ee362201f81?q=80&w=800&auto=format&fit=crop" alt="">
+      </div>
+
+      <div class="info">
+        <h2 class="title">DeadPool</h2>
+        <span class="likes">59.7k ♡</span>
+      </div>
+
+      <button class="bid-btn">Place Bid</button>
+
+    </div>
+
+    <!-- CARD 7 -->
+
+    <div class="card">
+
+      <div class="img-box">
+        <img src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92eee?q=80&w=800&auto=format&fit=crop" alt="">
+      </div>
+
+      <div class="info">
+        <h2 class="title">White Eye</h2>
+        <span class="likes">45.7k ♡</span>
+      </div>
+
+      <button class="bid-btn">Place Bid</button>
+
+    </div>
+
+    <!-- CARD 8 -->
+
+    <div class="card">
+
+      <div class="img-box">
+        <img src="https://images.unsplash.com/photo-1614728894747-a83421789f10?q=80&w=800&auto=format&fit=crop" alt="">
+      </div>
+
+      <div class="info">
+        <h2 class="title">Plastic Spinal</h2>
+        <span class="likes">98.6k ♡</span>
+      </div>
+
+      <button class="bid-btn">Place Bid</button>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
