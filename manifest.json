@@ -1,0 +1,30 @@
+{
+  "name": "Exam Escape",
+  "short_name": "ExamEscape",
+  "description": "Escape the exam room, dodge teachers and exams, collect proxy attendance and notes!",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#120c1f",
+  "theme_color": "#ffaa00",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

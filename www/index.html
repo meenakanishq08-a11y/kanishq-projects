@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Exam Escape 🏃 — Subway Surfers Edition</title>
+
+<!-- PWA settings -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#120c1f">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+
+<!-- Mobile App wrapping support -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Exam Escape">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary: #ffcc00;
+    --primary-shadow: #cc9900;
+    --secondary: #ff5500;
+    --accent: #39ff14;
+    --pink: #ff007f;
+    --blue: #00ffff;
+    --dark-bg: #0c0817;
+    --card-bg: rgba(23, 15, 43, 0.85);
+    --border-color: rgba(255, 255, 255, 0.12);
+    --text: #ffffff;
+    --text-muted: #a49dbd;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background: radial-gradient(circle at center, #21153b 0%, var(--dark-bg) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Outfit', 'Trebuchet MS', Arial, sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+    padding: 12px;
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Stylized Cartoon Titles */
+  h1 {
+    font-family: 'Lilita One', cursive;
+    text-align: center;
+    font-size: clamp(32px, 6vw, 48px);
+    margin-bottom: 2px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--primary);
+    text-shadow: 
+      -3px -3px 0 #000,  
+       3px -3px 0 #000,
+      -3px  3px 0 #000,
+       3px  3px 0 #000,
+       0px  8px 0px var(--primary-shadow),
+       0px 14px 10px rgba(0,0,0,0.5);
+    transform: rotate(-1.5deg);
+    animation: bounceTitle 2s infinite ease-in-out alternate;
+  }
+
+  @keyframes bounceTitle {
+    0% { transform: translateY(0) rotate(-1.5deg); }
+    100% { transform: translateY(-4px) rotate(1.5deg); }
+  }
+
+  .sub {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  .game-card {
+    background: var(--card-bg);
+    border: 3px solid #000;
+    border-radius: 24px;
+    padding: 16px;
+    box-shadow: 0 16px 0px rgba(0,0,0,0.8), 0 24px 30px rgba(0,0,0,0.6);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* HUD Layout */
+  .hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .hud-left, .hud-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .pill {
+    background: #17112b;
+    border: 2px solid #000;
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 0 #000;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pill strong {
+    color: var(--primary);
+  }
+  .pill.active-shield { background: rgba(78, 205, 196, 0.2); border-color: var(--accent); }
+  .pill.active-shield strong { color: var(--accent); }
+  .pill.active-board { background: rgba(255, 0, 127, 0.2); border-color: var(--pink); }
+  .pill.active-board strong { color: var(--pink); }
+  .pill.active-magnet { background: rgba(0, 255, 255, 0.2); border-color: var(--blue); }
+  .pill.active-magnet strong { color: var(--blue); }
+
+  .icon-btn {
+    background: #1d1536;
+    border: 2px solid #000;
+    color: var(--text);
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0 4px 0 #000;
+    transition: transform 0.1s;
+  }
+  .icon-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #000;
+  }
+
+  /* Game Canvas Styling */
+  .canvas-container {
+    position: relative;
+    width: 100%;
+    border: 4px solid #000;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #090612;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+  }
+
+  #gameCanvas {
+    width: 100%;
+    display: block;
+    touch-action: none;
+  }
+
+  /* Buttons & Menu elements */
+  .menu-btn {
+    font-family: 'Lilita One', cursive;
+    background: linear-gradient(180deg, var(--primary) 0%, #ff9900 100%);
+    border: 3px solid #000;
+    color: #000;
+    padding: 12px 28px;
+    border-radius: 14px;
+    font-size: 18px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #000;
+    transition: all 0.1s ease;
+    text-transform: uppercase;
+  }
+  .menu-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 #000;
+  }
+  .menu-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #000;
+  }
+  .menu-btn.secondary {
+    background: linear-gradient(180deg, #ff5500 0%, #cc3300 100%);
+    color: #fff;
+  }
+  .menu-btn.ghost {
+    background: #251c47;
+    border-color: #000;
+    color: var(--text);
+    font-size: 14px;
+    padding: 8px 18px;
+    box-shadow: 0 4px 0 #000;
+  }
+  .menu-btn.ghost:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #000;
+  }
+
+  .controls-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  /* Subway Surfers Style Starting Screen (Splash Screen) Overlay */
+  .overlay-screen {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(12, 8, 23, 0.94);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    padding: 20px;
+    text-align: center;
+    border-radius: 20px;
+  }
+
+  .overlay-logo {
+    font-family: 'Lilita One', cursive;
+    font-size: clamp(38px, 8vw, 64px);
+    color: var(--accent);
+    text-transform: uppercase;
+    line-height: 0.9;
+    text-shadow: 
+      -4px -4px 0 #000,  
+       4px -4px 0 #000,
+      -4px  4px 0 #000,
+       4px  4px 0 #000,
+       0 10px 0px var(--pink),
+       0 18px 15px rgba(0,0,0,0.8);
+    margin-bottom: 24px;
+    transform: rotate(-3deg);
+  }
+
+  .character-select-title {
+    font-family: 'Lilita One', cursive;
+    font-size: 20px;
+    color: var(--primary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Character Selection Cards */
+  .character-grid {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .char-card {
+    background: #1d1536;
+    border: 3px solid #000;
+    border-radius: 16px;
+    padding: 10px 14px;
+    width: 130px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 5px 0 #000;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .char-card .avatar {
+    font-size: 34px;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4));
+  }
+  .char-card .name {
+    font-family: 'Lilita One', cursive;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .char-card .perk {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .char-card:hover {
+    transform: scale(1.04) translateY(-2px);
+    border-color: var(--primary);
+  }
+  .char-card.selected {
+    background: linear-gradient(135deg, #2b1752 0%, #461463 100%);
+    border-color: var(--accent);
+    box-shadow: 0 5px 0 var(--accent), 0 0 15px rgba(57,255,20,0.4);
+  }
+
+  /* Panels (Leaderboard / Save Score / Settings) */
+  .panel {
+    margin-top: 14px;
+    background: #18112d;
+    border: 3px solid #000;
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.5);
+  }
+  .panel h3 {
+    font-family: 'Lilita One', cursive;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .lb-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .lb-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #21183c;
+    border: 2px solid #000;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .lb-row.top-three {
+    background: linear-gradient(90deg, #2c1a52 0%, #3a165c 100%);
+    border-color: var(--primary);
+  }
+  .lb-row .rank-badge {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    background: #000;
+    border-radius: 50%;
+    color: #fff;
+    text-align: center;
+    line-height: 22px;
+    font-size: 11px;
+    font-weight: 900;
+    margin-right: 8px;
+  }
+  .lb-row:nth-child(1) .rank-badge { background: #ffd700; color: #000; }
+  .lb-row:nth-child(2) .rank-badge { background: #c0c0c0; color: #000; }
+  .lb-row:nth-child(3) .rank-badge { background: #cd7f32; color: #000; }
+
+  /* Save Row styling */
+  .save-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .save-row input {
+    flex: 1;
+    background: #100b21;
+    border: 2px solid #000;
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: #fff;
+    font-family: inherit;
+    font-weight: 600;
+    outline: none;
+    font-size: 14px;
+  }
+  .save-row input:focus {
+    border-color: var(--primary);
+  }
+
+  /* Settings Panel inside Modal/Card */
+  .settings-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .settings-box label {
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .settings-box input {
+    background: #100b21;
+    border: 2px solid #000;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #fff;
+    font-size: 12px;
+    font-family: inherit;
+  }
+
+  .status-msg {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 6px;
+  }
+
+  .legend-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .legend-list span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #17112b;
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+
+  .tips {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    line-height: 1.4;
+  }
+
+  /* Utility classes */
+  .d-none { display: none !important; }
+  .text-pink { color: var(--pink) !important; }
+  .text-accent { color: var(--accent) !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Exam Escape</h1>
+  <p class="sub">Run away from Exams and Teachers! Swipe to Jump / Slide!</p>
+
+  <div class="game-card">
+    
+    <!-- HUD Panel -->
+    <div class="hud">
+      <div class="hud-left">
+        <div class="pill">🏆 <span id="scoreText">Score</span>: <strong id="scoreDisplay">0</strong></div>
+        <div class="pill">⚡ High: <strong id="highDisplay">0</strong></div>
+      </div>
+      <div class="hud-right">
+        <div class="pill" id="shieldPill" style="display:none;">🛡️ <strong id="shieldDisplay">Off</strong></div>
+        <div class="pill" id="hoverboardPill" style="display:none;">🛹 <strong id="hoverboardDisplay">Off</strong></div>
+        <div class="pill" id="magnetPill" style="display:none;">🧲 <strong id="magnetDisplay">Off</strong></div>
+        <div class="icon-btn" id="muteBtn" title="Mute Toggle">🔊</div>
+        <div class="icon-btn" id="settingsToggleBtn" title="Backend Server Settings">⚙️</div>
+      </div>
+    </div>
+
+    <!-- Canvas Wrapper with custom overlays -->
+    <div class="canvas-container">
+      <canvas id="gameCanvas" width="760" height="360"></canvas>
+
+      <!-- Splash Screen / Main Menu Overlay -->
+      <div class="overlay-screen" id="menuOverlay">
+        <div class="overlay-logo">Exam Escape</div>
+        
+        <div class="character-select-title">Choose Your Runner:</div>
+        <div class="character-grid">
+          <div class="char-card selected" id="char-rohan" onclick="selectCharacter('rohan')">
+            <div class="avatar">🧑‍🎤</div>
+            <div class="name">Rohan</div>
+            <div class="perk">Starts w/ Shield</div>
+          </div>
+          <div class="char-card" id="char-neha" onclick="selectCharacter('neha')">
+            <div class="avatar">🤓</div>
+            <div class="name">Neha</div>
+            <div class="perk">1.5x Score Perk</div>
+          </div>
+          <div class="char-card" id="char-kabir" onclick="selectCharacter('kabir')">
+            <div class="avatar">🛹</div>
+            <div class="name">Kabir</div>
+            <div class="perk">Starts w/ Board</div>
+          </div>
+        </div>
+
+        <button class="menu-btn" id="playBtn">Play Game</button>
+      </div>
+
+      <!-- Game Paused Overlay -->
+      <div class="overlay-screen d-none" id="pauseOverlay">
+        <div class="overlay-logo" style="color: var(--primary);">Paused</div>
+        <button class="menu-btn" id="resumeBtn" style="margin-bottom:12px;">Resume</button>
+        <button class="menu-btn secondary" id="exitBtn">Exit Menu</button>
+      </div>
+
+      <!-- Game Over Overlay -->
+      <div class="overlay-screen d-none" id="gameOverOverlay">
+        <div class="overlay-logo" style="color: var(--pink);">Crashed!</div>
+        <h2 style="font-family:'Lilita One'; margin-bottom:14px; font-size:24px;">Your Score: <span id="finalScore" class="text-pink">0</span></h2>
+        <div style="display:flex; gap:12px;">
+          <button class="menu-btn" id="retryBtn">Run Again</button>
+          <button class="menu-btn secondary" id="menuBtn">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Button Controls -->
+    <div class="controls-row">
+      <button class="menu-btn secondary" id="pauseBtn" style="display:none; font-size:14px; padding:6px 14px;">Pause</button>
+      <button class="menu-btn ghost" id="installBtn" style="display:none;">📲 Install App</button>
+    </div>
+    
+    <!-- iOS PWA Manual Hint -->
+    <p class="tips" id="iosInstallHint" style="display:none; color: var(--accent);">On iPhone: tap Share ⬆️ then "Add to Home Screen" to install.</p>
+
+    <!-- Settings Panel (Hidden by default) -->
+    <div class="panel d-none" id="settingsPanel">
+      <h3>⚙️ Backend Server Configuration</h3>
+      <div class="settings-box">
+        <label>Server URL (Required for Android build):</label>
+        <input id="backendUrlInput" placeholder="e.g. https://exam-escape-backend.onrender.com">
+        <p style="font-size:11px; color: var(--text-muted);">Leave empty to use local web hosting APIs. Save changes and reload leaderboard.</p>
+        <button class="menu-btn ghost" id="saveSettingsBtn" style="margin-top:6px; align-self:flex-start;">Save Server Configuration</button>
+      </div>
+    </div>
+
+    <!-- Save Score Panel (Visible after Game Over) -->
+    <div class="panel d-none" id="savePanel">
+      <h3>🏆 Save your score to Leaderboard</h3>
+      <div class="save-row">
+        <input id="nameInput" maxlength="16" placeholder="Your Runner Tag Name">
+        <button class="menu-btn" id="saveScoreBtn" style="font-size:14px; padding:8px 16px; box-shadow:0 4px 0 #000;">Save</button>
+      </div>
+      <p class="status-msg" id="saveStatus"></p>
+    </div>
+
+    <!-- Leaderboard Panel -->
+    <div class="panel">
+      <h3>🥇 Top Escape Scores</h3>
+      <div class="lb-table" id="leaderboardList">
+        <p class="status-msg">Loading leaderboard…</p>
+      </div>
+      <button class="menu-btn ghost" id="refreshLbBtn" style="margin-top:10px; font-size:12px; padding:6px 12px;">Refresh Scores</button>
+    </div>
+
+    <!-- Game Items Legends -->
+    <div class="legend-list">
+      <span><span style="background:var(--pink); width:10px; height:10px; border-radius:50%;"></span>👩‍🏫 Teacher (Jump)</span>
+      <span><span style="background:#a65dff; width:10px; height:10px; border-radius:50%;"></span>🎤 Viva (Duck)</span>
+      <span><span style="background:#ff6a00; width:10px; height:10px; border-radius:50%;"></span>📚 Exam (Jump)</span>
+      <span><span style="background:var(--accent); width:10px; height:10px; border-radius:50%;"></span>🪪 Proxy (Shield)</span>
+      <span><span style="background:var(--primary); width:10px; height:10px; border-radius:50%;"></span>📝 Leaked Notes (+Score)</span>
+      <span><span style="background:var(--pink); width:10px; height:10px; border-radius:50%;"></span>🛹 Hoverboard (Invincible)</span>
+      <span><span style="background:var(--blue); width:10px; height:10px; border-radius:50%;"></span>🧲 Magnet (Pulls Notes)</span>
+    </div>
+
+    <p class="tips">
+      <strong>Desktop controls:</strong> Space or ↑ = Jump, ↓ = Duck (slide), P = Pause<br>
+      <strong>Mobile controls:</strong> SWIPE Up to Jump, SWIPE Down to slide under Viva microphones!
+    </p>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width;
+const H = canvas.height;
+const GROUND_Y = H - 60; // 300
+
+// HUD elements
+const scoreDisplay = document.getElementById('scoreDisplay');
+const highDisplay = document.getElementById('highDisplay');
+const shieldDisplay = document.getElementById('shieldDisplay');
+const shieldPill = document.getElementById('shieldPill');
+const hoverboardDisplay = document.getElementById('hoverboardDisplay');
+const hoverboardPill = document.getElementById('hoverboardPill');
+const magnetDisplay = document.getElementById('magnetDisplay');
+const magnetPill = document.getElementById('magnetPill');
+const muteBtn = document.getElementById('muteBtn');
+const settingsToggleBtn = document.getElementById('settingsToggleBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const backendUrlInput = document.getElementById('backendUrlInput');
+const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+// Overlay menus
+const menuOverlay = document.getElementById('menuOverlay');
+const pauseOverlay = document.getElementById('pauseOverlay');
+const gameOverOverlay = document.getElementById('gameOverOverlay');
+const finalScore = document.getElementById('finalScore');
+
+// Buttons
+const playBtn = document.getElementById('playBtn');
+const resumeBtn = document.getElementById('resumeBtn');
+const exitBtn = document.getElementById('exitBtn');
+const retryBtn = document.getElementById('retryBtn');
+const menuBtn = document.getElementById('menuBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const installBtn = document.getElementById('installBtn');
+const iosInstallHint = document.getElementById('iosInstallHint');
+
+// Leaderboard / Save Score elements
+const savePanel = document.getElementById('savePanel');
+const nameInput = document.getElementById('nameInput');
+const saveScoreBtn = document.getElementById('saveScoreBtn');
+const saveStatus = document.getElementById('saveStatus');
+const leaderboardList = document.getElementById('leaderboardList');
+const refreshLbBtn = document.getElementById('refreshLbBtn');
+
+// =================== PLATFORM DETECTION ===================
+function detectPlatform(){
+  const ua = navigator.userAgent || '';
+  if(/iPhone|iPad|iPod/.test(ua)) return 'ios';
+  if(/Android/.test(ua)) return 'android';
+  return 'web';
+}
+const PLATFORM = detectPlatform();
+
+// Load settings
+let savedBackendUrl = localStorage.getItem('apiBaseUrl') || '';
+backendUrlInput.value = savedBackendUrl;
+
+saveSettingsBtn.addEventListener('click', () => {
+  savedBackendUrl = backendUrlInput.value.trim();
+  localStorage.setItem('apiBaseUrl', savedBackendUrl);
+  alert('Server configuration updated! Leaderboard will now fetch from this URL.');
+  fetchLeaderboard();
+});
+
+settingsToggleBtn.addEventListener('click', () => {
+  settingsPanel.classList.toggle('d-none');
+});
+
+// =================== PWA INSTALL ===================
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  installBtn.style.display = 'inline-block';
+});
+installBtn.addEventListener('click', async ()=>{
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  installBtn.style.display = 'none';
+});
+if(PLATFORM === 'ios' && !window.navigator.standalone){
+  iosInstallHint.style.display = 'block';
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+
+// =================== AUDIO SYNTHESIZER ===================
+let audioCtx = null;
+let muted = false;
+let musicInterval = null;
+let musicTempo = 135; // Beat Tempo (bpm)
+let beatStep = 0;
+
+function ensureAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function beep(opts){
+  if(muted) return;
+  ensureAudio();
+  const freq = opts.freq || 440;
+  const dur = opts.dur || 0.12;
+  const type = opts.type || 'sine';
+  const vol = opts.vol || 0.18;
+  const slideTo = opts.slideTo || null;
+  
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  if(slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, audioCtx.currentTime + dur);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+
+const sfx = {
+  jump:   () => { beep({freq:320, slideTo:560, dur:0.15, type:'triangle', vol:0.18}); },
+  duck:   () => { beep({freq:220, slideTo:140, dur:0.12, type:'sine', vol:0.18}); },
+  shield: () => { beep({freq:440, slideTo:880, dur:0.25, type:'sine', vol:0.2}); },
+  board:  () => { beep({freq:520, slideTo:920, dur:0.3, type:'triangle', vol:0.22}); },
+  magnet: () => { beep({freq:620, slideTo:780, dur:0.2, type:'sine', vol:0.2}); },
+  notes:  () => { 
+    beep({freq:660, dur:0.06, type:'sine', vol:0.15}); 
+    setTimeout(() => { beep({freq:880, dur:0.1, type:'sine', vol:0.15}); }, 60); 
+  },
+  hit:    () => { beep({freq:200, slideTo:50, dur:0.4, type:'sawtooth', vol:0.28}); },
+  boardsmash: () => { beep({freq:300, slideTo:100, dur:0.35, type:'sawtooth', vol:0.25}); },
+  pause:  () => { beep({freq:300, dur:0.08, type:'sine', vol:0.1}); },
+};
+
+// Background Music Sequencer using Web Audio
+function playSynthKick(time) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.frequency.setValueAtTime(140, time);
+  osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.14);
+  gain.gain.setValueAtTime(0.24, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.14);
+  osc.start(time);
+  osc.stop(time + 0.14);
+}
+
+function playSynthSnare(time) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(180, time);
+  osc.connect(gain).connect(audioCtx.destination);
+  gain.gain.setValueAtTime(0.12, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.11);
+  osc.start(time);
+  osc.stop(time + 0.11);
+}
+
+function playSynthHihat(time) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(6500, time);
+  osc.connect(gain).connect(audioCtx.destination);
+  gain.gain.setValueAtTime(0.02, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
+  osc.start(time);
+  osc.stop(time + 0.04);
+}
+
+function playSynthBass(freq, time, dur) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(freq / 2, time);
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(260, time);
+  osc.connect(filter).connect(gain).connect(audioCtx.destination);
+  gain.gain.setValueAtTime(0.07, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc.start(time);
+  osc.stop(time + dur);
+}
+
+function playMusicStep() {
+  if (muted || state !== 'running') return;
+  ensureAudio();
+  const time = audioCtx.currentTime;
+  const stepDur = 60 / musicTempo / 4;
+  
+  const scale = [98.0, 110.0, 130.81, 146.83]; // G2, A2, C3, D3
+  const noteIndex = Math.floor(beatStep / 4) % scale.length;
+  
+  if (beatStep % 4 === 0) playSynthKick(time);
+  if (beatStep % 8 === 4) playSynthSnare(time);
+  if (beatStep % 2 === 1) playSynthHihat(time);
+  if (beatStep % 4 === 0 || beatStep % 4 === 2) {
+    playSynthBass(scale[noteIndex], time, stepDur * 1.6);
+  }
+  
+  beatStep = (beatStep + 1) % 16;
+}
+
+function startMusic() {
+  stopMusic();
+  beatStep = 0;
+  const stepTimeMs = (60 / musicTempo / 4) * 1000;
+  musicInterval = setInterval(playMusicStep, stepTimeMs);
+}
+
+function stopMusic() {
+  if (musicInterval) {
+    clearInterval(musicInterval);
+    musicInterval = null;
+  }
+}
+
+muteBtn.addEventListener('click', () => {
+  muted = !muted;
+  muteBtn.textContent = muted ? '🔇' : '🔊';
+});
+
+// =================== GAME CORE STATE ===================
+let state = 'idle'; // idle | running | paused | over
+let score = 0;
+let highScore = parseInt(localStorage.getItem('highScore') || '0');
+highDisplay.textContent = highScore;
+let speed = 6;
+let frame = 0;
+let spawnTimer = 0;
+let nextSpawnAt = 70;
+
+let shieldActive = false;
+let shieldTimer = 0;
+let hoverboardActive = false;
+let hoverboardTimer = 0;
+let magnetActive = false;
+let magnetTimer = 0;
+let invulTimer = 0; // Invincibility flash frame timer
+
+let noteFlashTimer = 0;
+let activeNotesCollectedText = '';
+let combo = 1;
+let comboTimer = 0;
+let particles = [];
+
+// Subway sleepers (tracks ties) data
+let sleepers = [];
+for (let i = 0; i < 20; i++) {
+  sleepers.push({ x: i * 45 });
+}
+
+// Parallax Layers
+let bgLayers = [
+  // Skyline distant
+  { speedMul: 0.12, items: [], color: 'rgba(57, 34, 115, 0.25)', w: 90, h: 180 },
+  // Corridor Corridor walls (Middle background)
+  { speedMul: 0.38, items: [], color: 'rgba(32, 21, 69, 0.7)', w: 40, h: 120 }
+];
+
+function initBgLayers(){
+  bgLayers[0].items = [];
+  for(let i = 0; i < 10; i++) {
+    bgLayers[0].items.push({ x: i * 110, y: GROUND_Y - 180 - Math.random() * 40 });
+  }
+  bgLayers[1].items = [];
+  for(let i = 0; i < 18; i++) {
+    bgLayers[1].items.push({ x: i * 50, y: GROUND_Y - 120 });
+  }
+}
+
+// Selected character
+let selectedChar = 'rohan';
+function selectCharacter(charId) {
+  selectedChar = charId;
+  document.querySelectorAll('.char-card').forEach(card => card.classList.remove('selected'));
+  document.getElementById('char-' + charId).classList.add('selected');
+  beep({freq: 400, dur: 0.1, type: 'sine'});
+}
+
+// Character specific parameters
+const player = {
+  x: 95, y: GROUND_Y, w: 40, h: 54, vy: 0,
+  ducking: false, jumping: false, baseH: 54, duckH: 30,
+  squash: 1, bob: 0
+};
+const GRAVITY = 0.85;
+const JUMP_FORCE = -15.5;
+
+let entities = [];
+
+const OBSTACLE_TYPES = [
+  { type: 'Teacher', emoji: '👩‍🏫', w: 34, h: 56, mode: 'jump', color: '#ff4757' },
+  { type: 'Viva', emoji: '🎤', w: 44, h: 32, mode: 'duck', color: '#a65dff' },
+  { type: 'Assignment', emoji: '📚', w: 32, h: 38, mode: 'jump', color: '#ff6a00' }
+];
+
+const POWERUP_TYPES = [
+  { type: 'Proxy Attendance', emoji: '🪪', w: 30, h: 30, effect: 'shield', color: '#4ecdc4' },
+  { type: 'Leaked Notes', emoji: '📝', w: 28, h: 28, effect: 'score', color: '#f7c548' },
+  { type: 'Hoverboard', emoji: '🛹', w: 28, h: 28, effect: 'hoverboard', color: '#ff007f' },
+  { type: 'Magnet', emoji: '🧲', w: 28, h: 28, effect: 'magnet', color: '#00ffff' }
+];
+
+// Graffiti phrases spawned on scrollable middle wall
+let graffitiItems = [];
+const GRAFFITI_PHRASES = ['BUNK!', 'PROXY', 'RUN!', 'A+', 'NO EXAMS', 'STUDENT LIFE', 'HELP!'];
+const GRAFFITI_COLORS = ['#ff007f', '#39ff14', '#00ffff', '#ffcc00'];
+
+function spawnGraffiti() {
+  const text = GRAFFITI_PHRASES[Math.floor(Math.random() * GRAFFITI_PHRASES.length)];
+  const color = GRAFFITI_COLORS[Math.floor(Math.random() * GRAFFITI_COLORS.length)];
+  graffitiItems.push({
+    x: W + 20,
+    y: GROUND_Y - 70 - Math.random() * 50,
+    text: text,
+    color: color,
+    size: 16 + Math.floor(Math.random() * 8)
+  });
+}
+
+function resetGame() {
+  score = 0; speed = 6.2; frame = 0; spawnTimer = 0; nextSpawnAt = 70;
+  shieldActive = false; shieldTimer = 0;
+  hoverboardActive = false; hoverboardTimer = 0;
+  magnetActive = false; magnetTimer = 0;
+  invulTimer = 0;
+  
+  entities = []; particles = []; graffitiItems = [];
+  player.y = GROUND_Y; player.vy = 0; player.jumping = false; player.ducking = false;
+  player.h = player.baseH; player.squash = 1;
+  
+  // HUD update
+  shieldPill.style.display = 'none';
+  hoverboardPill.style.display = 'none';
+  magnetPill.style.display = 'none';
+  
+  // Character Perks application at start
+  if (selectedChar === 'rohan') {
+    shieldActive = true; shieldTimer = 300; // 5 seconds shield
+    shieldDisplay.textContent = '🛡️ active';
+    shieldPill.style.display = 'flex';
+    shieldPill.className = 'pill active-shield';
+  } else if (selectedChar === 'kabir') {
+    hoverboardActive = true; hoverboardTimer = 480; // 8 seconds hoverboard
+    hoverboardDisplay.textContent = '🛹 active';
+    hoverboardPill.style.display = 'flex';
+    hoverboardPill.className = 'pill active-board';
+  }
+  
+  initBgLayers();
+}
+
+function startGame() {
+  ensureAudio();
+  resetGame();
+  state = 'running';
+  
+  menuOverlay.classList.add('d-none');
+  pauseOverlay.classList.add('d-none');
+  gameOverOverlay.classList.add('d-none');
+  savePanel.classList.add('d-none');
+  pauseBtn.style.display = 'inline-block';
+  
+  // Tempo of synth music loop resets
+  musicTempo = 135;
+  startMusic();
+  requestAnimationFrame(loop);
+}
+
+function endGame() {
+  state = 'over';
+  stopMusic();
+  sfx.hit();
+  spawnBurst(player.x + player.w/2, player.y - player.h/2, '#ff007f', 24);
+  
+  const oldHigh = highScore;
+  highScore = Math.max(highScore, Math.floor(score));
+  localStorage.setItem('highScore', highScore);
+  highDisplay.textContent = highScore;
+  
+  finalScore.textContent = Math.floor(score);
+  gameOverOverlay.classList.remove('d-none');
+  pauseBtn.style.display = 'none';
+  
+  savePanel.classList.remove('d-none');
+  nameInput.focus();
+}
+
+function triggerPause(){
+  if(state === 'running'){
+    state = 'paused';
+    stopMusic();
+    pauseOverlay.classList.remove('d-none');
+    sfx.pause();
+    draw();
+  } else if(state === 'paused'){
+    state = 'running';
+    pauseOverlay.classList.add('d-none');
+    sfx.pause();
+    startMusic();
+    requestAnimationFrame(loop);
+  }
+}
+
+function jump() {
+  if (state !== 'running') return;
+  if (!player.jumping && !player.ducking) {
+    player.vy = JUMP_FORCE;
+    player.jumping = true;
+    player.squash = 1.3;
+    sfx.jump();
+    // Spray jump particles
+    spawnBurst(player.x + player.w/2, player.y, '#39ff14', 6);
+  }
+}
+
+function duckStart() {
+  if (state !== 'running') return;
+  if (!player.jumping) {
+    player.ducking = true;
+    player.h = player.duckH;
+    sfx.duck();
+    // Slide dust trail
+    spawnBurst(player.x, player.y, '#ffaa00', 4);
+  }
+}
+
+function duckEnd() {
+  player.ducking = false;
+  player.h = player.baseH;
+}
+
+// Auto recovering slider layout for mobile swipe
+let duckTimeout = null;
+function mobileDuckStart() {
+  duckStart();
+  if(duckTimeout) clearTimeout(duckTimeout);
+  duckTimeout = setTimeout(() => {
+    duckEnd();
+  }, 600); // recover after 600ms automatically
+}
+
+// =================== PARTICLES BURST ===================
+function spawnBurst(x, y, color, n) {
+  n = n || 10;
+  for (let i = 0; i < n; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speedP = 1.5 + Math.random() * 4;
+    particles.push({
+      x: x, y: y,
+      vx: Math.cos(angle) * speedP,
+      vy: Math.sin(angle) * speedP - 1,
+      life: 20 + Math.random() * 15,
+      maxLife: 35,
+      color: color
+    });
+  }
+}
+
+function updateParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+    ctx.fillStyle = p.color;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+  ctx.globalAlpha = 1;
+}
+
+// =================== SWIPE GESTURES CONTROLS ===================
+let startTouchX = 0;
+let startTouchY = 0;
+
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
+  if (e.code === 'ArrowDown') { e.preventDefault(); duckStart(); }
+  if (e.code === 'KeyP') { if (state==='running' || state==='paused') triggerPause(); }
+});
+window.addEventListener('keyup', (e) => {
+  if (e.code === 'ArrowDown') { duckEnd(); }
+});
+
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  ensureAudio();
+  startTouchX = e.touches[0].clientX;
+  startTouchY = e.touches[0].clientY;
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  const diffX = e.changedTouches[0].clientX - startTouchX;
+  const diffY = e.changedTouches[0].clientY - startTouchY;
+  
+  if (Math.abs(diffY) > Math.abs(diffX)) {
+    if (diffY < -30) {
+      jump();
+    } else if (diffY > 30) {
+      mobileDuckStart();
+    }
+  }
+}, { passive: false });
+
+// Play Button trigger
+playBtn.addEventListener('click', startGame);
+retryBtn.addEventListener('click', startGame);
+resumeBtn.addEventListener('click', triggerPause);
+pauseBtn.addEventListener('click', triggerPause);
+
+exitBtn.addEventListener('click', () => {
+  state = 'idle';
+  stopMusic();
+  pauseOverlay.classList.add('d-none');
+  menuOverlay.classList.remove('d-none');
+});
+menuBtn.addEventListener('click', () => {
+  state = 'idle';
+  gameOverOverlay.classList.add('d-none');
+  savePanel.classList.add('d-none');
+  menuOverlay.classList.remove('d-none');
+});
+
+// =================== SPAWN SYSTEM ===================
+function spawnEntity() {
+  const roll = Math.random();
+  if (roll < 0.32) {
+    // Spawn power-up (including Hoverboard and Magnet)
+    const p = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+    const heightOffset = Math.random() < 0.4 ? 40 : 0;
+    entities.push(Object.assign({}, p, { 
+      x: W + 20, 
+      y: GROUND_Y - p.h - heightOffset, 
+      kind: 'powerup' 
+    }));
+  } else {
+    // Spawn Obstacle
+    const o = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
+    const y = o.mode === 'duck' ? GROUND_Y - o.h - 38 : GROUND_Y - o.h;
+    entities.push(Object.assign({}, o, { 
+      x: W + 20, 
+      y: y, 
+      kind: 'obstacle' 
+    }));
+  }
+}
+
+function rectsOverlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+// =================== GAME UPDATE ===================
+function update() {
+  frame++;
+  
+  // Score multiplier logic based on topper character choice
+  const scoreMultiplier = (selectedChar === 'neha') ? 1.5 : 1.0;
+  score += (0.13 + speed * 0.01) * combo * scoreMultiplier;
+  scoreDisplay.textContent = Math.floor(score);
+
+  speed = 6.2 + Math.min(8.8, score / 180);
+  
+  // Speed up Synth Beat dynamically with running speed
+  musicTempo = 135 + Math.min(45, (speed - 6.2) * 6);
+
+  // Jump physics
+  if (player.jumping) {
+    player.y += player.vy;
+    player.vy += GRAVITY;
+    if (player.y >= GROUND_Y) {
+      player.y = GROUND_Y;
+      player.vy = 0;
+      player.jumping = false;
+      player.squash = 0.8; // landing squash impact
+    }
+  }
+  player.squash += (1 - player.squash) * 0.15;
+  player.bob = Math.sin(frame * 0.38) * (player.jumping ? 0 : 3.5);
+
+  // Background items spawning & scrolling
+  spawnTimer++;
+  if (spawnTimer >= nextSpawnAt) {
+    spawnEntity();
+    spawnTimer = 0;
+    nextSpawnAt = Math.max(34, 76 - speed * 3 + Math.random() * 25);
+  }
+
+  if (frame % 220 === 0) {
+    spawnGraffiti();
+  }
+
+  // Active timers ticking down
+  if (shieldActive) {
+    shieldTimer--;
+    if (shieldTimer <= 0) {
+      shieldActive = false;
+      shieldPill.style.display = 'none';
+    } else {
+      shieldDisplay.textContent = '🛡️ ' + Math.ceil(shieldTimer / 60) + 's';
+    }
+  }
+
+  if (hoverboardActive) {
+    hoverboardTimer--;
+    if (hoverboardTimer <= 0) {
+      hoverboardActive = false;
+      hoverboardPill.style.display = 'none';
+    } else {
+      hoverboardDisplay.textContent = '🛹 ' + Math.ceil(hoverboardTimer / 60) + 's';
+    }
+  }
+
+  if (magnetActive) {
+    magnetTimer--;
+    if (magnetTimer <= 0) {
+      magnetActive = false;
+      magnetPill.style.display = 'none';
+    } else {
+      magnetDisplay.textContent = '🧲 ' + Math.ceil(magnetTimer / 60) + 's';
+    }
+  }
+
+  if (invulTimer > 0) invulTimer--;
+
+  if (noteFlashTimer > 0) noteFlashTimer--;
+
+  if (comboTimer > 0) {
+    comboTimer--;
+    if (comboTimer === 0) combo = 1;
+  }
+
+  // Scroll sleepers (tracks)
+  sleepers.forEach(s => {
+    s.x -= speed;
+    if (s.x < -30) s.x = W + Math.random() * 10;
+  });
+
+  // Scroll parallax layers
+  bgLayers.forEach(layer => {
+    layer.items.forEach(it => {
+      it.x -= speed * layer.speedMul;
+      if (it.x < -layer.w) {
+        it.x = W + layer.w;
+        if (layer.speedMul === 0.12) it.y = GROUND_Y - 180 - Math.random() * 40;
+      }
+    });
+  });
+
+  // Scroll graffiti tags
+  for (let i = graffitiItems.length - 1; i >= 0; i--) {
+    const gf = graffitiItems[i];
+    gf.x -= speed * 0.38;
+    if (gf.x < -150) graffitiItems.splice(i, 1);
+  }
+
+  const playerBox = { x: player.x, y: player.y - player.h, w: player.w, h: player.h };
+
+  // Loop entities and collision checks
+  for (let i = entities.length - 1; i >= 0; i--) {
+    const e = entities[i];
+    
+    // Magnet attraction calculation
+    if (magnetActive && e.kind === 'powerup' && e.effect === 'score') {
+      const dx = (player.x + player.w/2) - (e.x + e.w/2);
+      const dy = (player.y - player.h/2) - (e.y - e.h/2);
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 220) {
+        e.x += (dx / dist) * (speed + 7);
+        e.y += (dy / dist) * (speed + 7);
+      } else {
+        e.x -= speed;
+      }
+    } else {
+      e.x -= speed;
+    }
+
+    const eBox = { x: e.x, y: e.y, w: e.w, h: e.h };
+    
+    if (rectsOverlap(playerBox, eBox)) {
+      if (e.kind === 'obstacle') {
+        if (invulTimer > 0) {
+          // ignore crash when invulnerable
+          entities.splice(i, 1);
+          continue;
+        }
+
+        // Active Hoverboard board-smash protection takes priority
+        if (hoverboardActive) {
+          hoverboardActive = false;
+          hoverboardTimer = 0;
+          hoverboardPill.style.display = 'none';
+          
+          sfx.boardsmash();
+          spawnBurst(e.x + e.w/2, e.y + e.h/2, '#ff007f', 16);
+          
+          invulTimer = 120; // 2 seconds of recovery blink
+          entities.splice(i, 1);
+          continue;
+        }
+
+        // Shield protection
+        if (shieldActive) {
+          shieldActive = false;
+          shieldTimer = 0;
+          shieldPill.style.display = 'none';
+          
+          sfx.boardsmash();
+          spawnBurst(e.x + e.w/2, e.y + e.h/2, '#4ecdc4', 16);
+          
+          invulTimer = 60; // 1 second invulnerability
+          entities.splice(i, 1);
+          continue;
+        }
+
+        // Normal crash -> Game Over
+        endGame();
+        return;
+      } else {
+        // Collect Powerups
+        if (e.effect === 'shield') {
+          shieldActive = true; shieldTimer = 360;
+          shieldDisplay.textContent = '🛡️ active';
+          shieldPill.className = 'pill active-shield';
+          shieldPill.style.display = 'flex';
+          sfx.shield();
+          spawnBurst(e.x + e.w/2, e.y + e.h/2, '#4ecdc4', 14);
+        } 
+        else if (e.effect === 'hoverboard') {
+          hoverboardActive = true; hoverboardTimer = 480; // 8s
+          hoverboardDisplay.textContent = '🛹 active';
+          hoverboardPill.className = 'pill active-board';
+          hoverboardPill.style.display = 'flex';
+          sfx.board();
+          spawnBurst(e.x + e.w/2, e.y + e.h/2, '#ff007f', 14);
+        }
+        else if (e.effect === 'magnet') {
+          magnetActive = true; magnetTimer = 480; // 8s
+          magnetDisplay.textContent = '🧲 active';
+          magnetPill.className = 'pill active-magnet';
+          magnetPill.style.display = 'flex';
+          sfx.magnet();
+          spawnBurst(e.x + e.w/2, e.y + e.h/2, '#00ffff', 14);
+        }
+        else if (e.effect === 'score') {
+          const addedScore = 40 * combo * scoreMultiplier;
+          score += 40 * combo * scoreMultiplier;
+          noteFlashTimer = 25;
+          activeNotesCollectedText = '+' + Math.floor(addedScore);
+          
+          // Topper character has faster combos
+          const comboMaxTime = (selectedChar === 'neha') ? 450 : 300;
+          combo = Math.min(5, combo + 1);
+          comboTimer = comboMaxTime;
+          
+          sfx.notes();
+          spawnBurst(e.x + e.w/2, e.y + e.h/2, '#f7c548', 10);
+        }
+        entities.splice(i, 1);
+        continue;
+      }
+    }
+
+    if (e.x + e.w < -30) entities.splice(i, 1);
+  }
+
+  updateParticles();
+}
+
+// =================== CANVAS RENDER GRAPHICS ===================
+function drawBackground() {
+  // Starry deep sky gradient
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#0c0817');
+  grad.addColorStop(0.6, '#180f33');
+  grad.addColorStop(1, '#2c1547');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Background stars
+  ctx.fillStyle = '#ffffff';
+  for(let i = 0; i < 8; i++) {
+    const starX = (W * 0.15 * i + frame * 0.05) % W;
+    const starY = (H * 0.23 * i) % (GROUND_Y - 100);
+    ctx.globalAlpha = 0.2 + Math.abs(Math.sin((frame + i * 20) * 0.02)) * 0.6;
+    ctx.fillRect(starX, starY, 2, 2);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawBuildings() {
+  // Layer 1 Distant City silhouettes
+  ctx.fillStyle = bgLayers[0].color;
+  bgLayers[0].items.forEach(building => {
+    ctx.fillRect(building.x, building.y, bgLayers[0].w, GROUND_Y - building.y);
+    // Draw building window grids
+    ctx.fillStyle = 'rgba(255, 230, 100, 0.07)';
+    for(let r = 0; r < 4; r++) {
+      for(let c = 0; c < 2; c++) {
+        ctx.fillRect(building.x + 12 + c * 24, building.y + 15 + r * 30, 12, 16);
+      }
+    }
+    ctx.fillStyle = bgLayers[0].color;
+  });
+
+  // Layer 2 Wall/Bricks and Overhead subway lines
+  ctx.fillStyle = bgLayers[1].color;
+  bgLayers[1].items.forEach(wall => {
+    ctx.fillRect(wall.x, wall.y, bgLayers[1].w, GROUND_Y - wall.y);
+    // brick line accents
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.strokeRect(wall.x, wall.y, bgLayers[1].w, GROUND_Y - wall.y);
+  });
+
+  // Draw scrolling spray-paint graffiti slogans
+  graffitiItems.forEach(gf => {
+    ctx.save();
+    ctx.fillStyle = gf.color;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = gf.color;
+    ctx.font = 'bold ' + gf.size + 'px "Lilita One", sans-serif';
+    ctx.fillText(gf.text, gf.x, gf.y);
+    ctx.restore();
+  });
+}
+
+function drawSubwayTracks() {
+  // Gravel base
+  ctx.fillStyle = '#140a24';
+  ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+  
+  // Track rails (Top rail and bottom rail side scroller perspective)
+  ctx.strokeStyle = '#292138';
+  ctx.lineWidth = 14;
+  
+  // sleepers (Ties)
+  ctx.fillStyle = '#422718';
+  sleepers.forEach(s => {
+    ctx.fillRect(s.x, GROUND_Y + 4, 15, 45);
+    // sleeper plates
+    ctx.fillStyle = '#1e110b';
+    ctx.fillRect(s.x, GROUND_Y + 12, 15, 4);
+    ctx.fillRect(s.x, GROUND_Y + 32, 15, 4);
+    ctx.fillStyle = '#422718';
+  });
+
+  // Steel Rails shines
+  ctx.strokeStyle = '#73708c';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(0, GROUND_Y + 14);
+  ctx.lineTo(W, GROUND_Y + 14);
+  ctx.moveTo(0, GROUND_Y + 34);
+  ctx.lineTo(W, GROUND_Y + 34);
+  ctx.stroke();
+
+  // Rail highlight shines
+  ctx.strokeStyle = '#bfbcca';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, GROUND_Y + 13);
+  ctx.lineTo(W, GROUND_Y + 13);
+  ctx.moveTo(0, GROUND_Y + 33);
+  ctx.lineTo(W, GROUND_Y + 33);
+  ctx.stroke();
+
+  // Overhead cables lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, 50);
+  ctx.lineTo(W, 50);
+  ctx.moveTo(0, 70);
+  ctx.lineTo(W, 70);
+  ctx.stroke();
+}
+
+function drawPlayer() {
+  if (invulTimer > 0 && Math.floor(frame / 6) % 2 === 0) {
+    // blinking invulnerability flash
+    return;
+  }
+
+  ctx.save();
+  const cx = player.x + player.w / 2;
+  const cy = player.y - player.h / 2 + player.bob;
+  ctx.translate(cx, cy);
+  ctx.scale(1 / player.squash, player.squash);
+  ctx.translate(-cx, -cy);
+
+  // Draw Active Hoverboard underneath feet
+  if (hoverboardActive) {
+    ctx.save();
+    // Skateboard deck shape
+    ctx.fillStyle = 'url(#deckGrad)';
+    const deckGrad = ctx.createLinearGradient(player.x - 10, player.y, player.x + player.w + 10, player.y);
+    deckGrad.addColorStop(0, '#ff007f');
+    deckGrad.addColorStop(1, '#ffaa00');
+    
+    ctx.fillStyle = deckGrad;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#ff007f';
+    
+    // Draw skateboard board
+    ctx.beginPath();
+    ctx.ellipse(cx, player.y + player.bob + 2, player.w * 0.75, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Board neon wheels
+    ctx.fillStyle = '#00ffff';
+    ctx.shadowColor = '#00ffff';
+    ctx.beginPath();
+    ctx.arc(player.x + 2, player.y + player.bob + 7, 5, 0, Math.PI*2);
+    ctx.arc(player.x + player.w - 2, player.y + player.bob + 7, 5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+    
+    // Trail particles from board
+    if (frame % 3 === 0) {
+      particles.push({
+        x: player.x,
+        y: player.y + player.bob + 5,
+        vx: -speed * 0.5 - Math.random() * 2,
+        vy: -0.5 - Math.random() * 1.5,
+        life: 15,
+        maxLife: 20,
+        color: '#ff007f'
+      });
+    }
+  }
+
+  // Draw Glowing Magnet aura
+  if (magnetActive) {
+    ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)';
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#00ffff';
+    ctx.beginPath();
+    ctx.arc(cx, cy, player.h * 0.75, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  // Draw Glowing Shield bubble
+  if (shieldActive) {
+    ctx.strokeStyle = 'rgba(78, 205, 196, 0.55)';
+    ctx.lineWidth = 4;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#4ecdc4';
+    ctx.beginPath();
+    ctx.arc(cx, cy, player.h * 0.8, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  // Draw player base emoji
+  ctx.font = (player.h) + 'px sans-serif';
+  ctx.textBaseline = 'bottom';
+  
+  // Custom characters avatar selection
+  let avatar = '🧑‍🎤';
+  if (selectedChar === 'neha') avatar = '🤓';
+  if (selectedChar === 'kabir') avatar = '🛹';
+
+  ctx.fillText(avatar, player.x, player.y + player.bob + 4);
+  ctx.restore();
+}
+
+function drawEntity(e) {
+  ctx.save();
+  ctx.font = Math.max(e.h, e.w) + 'px sans-serif';
+  ctx.textBaseline = 'bottom';
+  
+  // Add item neon glows
+  if (e.kind === 'powerup') {
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = e.color || '#fff';
+  }
+  ctx.fillText(e.emoji, e.x, e.y + e.h);
+  ctx.restore();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  drawBackground();
+  drawBuildings();
+  drawSubwayTracks();
+  
+  entities.forEach(drawEntity);
+  drawPlayer();
+  drawParticles();
+
+  // Floating text indicator (+40 Leaked Notes!)
+  if (noteFlashTimer > 0) {
+    ctx.fillStyle = '#ffea00';
+    ctx.font = 'bold 16px "Lilita One", sans-serif';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3;
+    ctx.strokeText(activeNotesCollectedText, player.x - 10, player.y - player.h - 12);
+    ctx.fillText(activeNotesCollectedText, player.x - 10, player.y - player.h - 12);
+  }
+}
+
+function loop() {
+  if (state === 'running') {
+    update();
+  }
+  draw();
+  if (state === 'running') {
+    requestAnimationFrame(loop);
+  }
+}
+
+// Initial draw static backdrop
+initBgLayers();
+draw();
+
+// =================== LEADERBOARD BACKEND API INTEGRATION ===================
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function getLeaderboardUrl() {
+  // If absolute backend URL settings exists, use it. Otherwise, use relative API URL.
+  const baseUrl = localStorage.getItem('apiBaseUrl') || '';
+  return baseUrl.endsWith('/') ? baseUrl + 'api/leaderboard' : (baseUrl ? baseUrl + '/api/leaderboard' : '/api/leaderboard');
+}
+
+function fetchLeaderboard() {
+  leaderboardList.innerHTML = '<p class="status-msg">Fetching top runner scores…</p>';
+  const url = getLeaderboardUrl();
+  
+  fetch(url)
+    .then(res => { if(!res.ok) throw new Error('backend offline'); return res.json(); })
+    .then(scores => {
+      if (!scores.length) {
+        leaderboardList.innerHTML = '<p class="status-msg">No runs logged yet! Escape the room and set the record!</p>';
+        return;
+      }
+      leaderboardList.innerHTML = scores.map((s, i) => {
+        const rowClass = i < 3 ? 'lb-row top-three' : 'lb-row';
+        const rankStr = '<span class="rank-badge">' + (i + 1) + '</span>';
+        const charIcon = s.platform === 'android' ? '📱' : (s.platform === 'ios' ? '🍎' : '🌐');
+        return '<div class="' + rowClass + '"><span>' + rankStr + escapeHtml(s.name) + ' (' + charIcon + ')</span><span>' + s.score + '</span></div>';
+      }).join('');
+    })
+    .catch(err => {
+      console.warn('Leaderboard connection error:', err);
+      leaderboardList.innerHTML = '<p class="status-msg">Leaderboard connection offline. Packaged mobile apps require entering your HTTPS Backend Server URL in Settings (⚙️).</p>';
+    });
+}
+
+saveScoreBtn.addEventListener('click', () => {
+  const name = nameInput.value.trim() || 'Anonymous Runner';
+  saveStatus.textContent = 'Saving score…';
+  const url = getLeaderboardUrl();
+  
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      name: name, 
+      score: Math.floor(score), 
+      platform: PLATFORM 
+    })
+  })
+  .then(res => { if(!res.ok) throw new Error('failed'); return res.json(); })
+  .then(() => {
+    saveStatus.textContent = 'Score uploaded! 🎉';
+    savePanel.classList.add('d-none');
+    fetchLeaderboard();
+  })
+  .catch(err => {
+    saveStatus.textContent = 'Could not save. Ensure your server URL settings (⚙️) points to a running HTTPS database server.';
+  });
+});
+
+refreshLbBtn.addEventListener('click', fetchLeaderboard);
+
+// Run leaderboard fetch on startup
+fetchLeaderboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "appId": "com.examescape.game",
+  "appName": "Exam Escape",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
